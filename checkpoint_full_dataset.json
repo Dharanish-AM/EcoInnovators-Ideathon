@@ -1,0 +1,57 @@
+{
+  "checkpoint_id": "full-dataset-v1",
+  "status": "paused",
+  "timestamp": "2025-12-12T12:00:00Z",
+  "reason": "User paused training to resume later",
+  
+  "training_progress": {
+    "epochs_completed": 3,
+    "total_epochs": 20,
+    "remaining_epochs": 17
+  },
+  
+  "latest_metrics": {
+    "epoch_1": {
+      "train_loss": 1.1400,
+      "val_loss": 1.1232,
+      "model_saved": true
+    },
+    "epoch_2": {
+      "train_loss": 0.9777,
+      "val_loss": 1.0508,
+      "model_saved": true
+    },
+    "epoch_3": {
+      "train_loss": 0.9559,
+      "val_loss": 1.0156,
+      "model_saved": true
+    }
+  },
+  
+  "best_model_info": {
+    "path": "trained_model/pv_segmentation.pt",
+    "best_epoch": 3,
+    "best_val_loss": 1.0156
+  },
+  
+  "dataset_info": {
+    "train_samples": 2422,
+    "val_samples": 644,
+    "total_samples": 3000,
+    "dataset_dir": "data/training_dataset"
+  },
+  
+  "hyperparameters": {
+    "epochs": 20,
+    "batch_size": 8,
+    "learning_rate": 0.001,
+    "optimizer": "Adam",
+    "loss_function": "BCE + Dice Loss",
+    "scheduler": "ReduceLROnPlateau"
+  },
+  
+  "resume_instructions": {
+    "command": "python -m pipeline_code.train_model --dataset_dir data/training_dataset --output_model trained_model/pv_segmentation.pt --epochs 20 --batch_size 8 --lr 0.001",
+    "note": "Model will load best checkpoint and continue from epoch 4. ReduceLROnPlateau scheduler will continue automatically."
+  }
+}

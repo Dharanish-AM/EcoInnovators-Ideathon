@@ -1,0 +1,22 @@
+[
+  {
+    "timestamp": "2025-12-11T15:00:53.314322",
+    "model_path": "trained_model/pv_segmentation.pt",
+    "dataset_dir": "data/training_dataset",
+    "hyperparameters": {
+      "epochs": 20,
+      "batch_size": 4,
+      "learning_rate": 0.001
+    },
+    "metrics": {
+      "accuracy": 0.8213651616522606,
+      "precision": 0.650980905511811,
+      "recall": 0.6650007711796394,
+      "f1_score": 0.6579161577339715,
+      "dice_coefficient": 0.6579161577339061,
+      "iou": 0.4902198633306111,
+      "mean_sample_dice": 0.32542972285626237,
+      "std_sample_dice": 0.37207162580586967
+    }
+  }
+]
