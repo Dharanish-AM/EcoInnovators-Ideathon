@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  solar-detection:
+    build: .
+    image: ecoinnovators/solar-pv-detection:latest
+    container_name: solar-pv-detector
+    environment:
+      - MAPBOX_API_KEY=${MAPBOX_API_KEY}
+      - GOOGLE_MAPS_API_KEY=${GOOGLE_MAPS_API_KEY}
+      - ESRI_API_KEY=${ESRI_API_KEY}
+    volumes:
+      # Mount input data
+      - ./data:/app/input:ro
+      # Mount output directory
+      - ./prediction_files:/app/output
+    command: >
+      --input_xlsx /app/input/EI_train_data.xlsx
+      --output_dir /app/output
+      --image_source mapbox
+      --zoom 20
+      --tile_size 640
+    restart: "no"
+    
+  # Optional: Streamlit UI service
+  streamlit-ui:
+    build:
+      context: .
+      dockerfile: Dockerfile.streamlit
+    image: ecoinnovators/solar-pv-detection:streamlit
+    container_name: solar-pv-ui
+    ports:
+      - "8501:8501"
+    environment:
+      - MAPBOX_API_KEY=${MAPBOX_API_KEY}
+    volumes:
+      - ./data:/app/data:ro
+      - ./trained_model:/app/trained_model:ro
+    command: streamlit run app.py
+    restart: unless-stopped
+    profiles:
+      - ui

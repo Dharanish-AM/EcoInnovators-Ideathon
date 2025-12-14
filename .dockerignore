@@ -1,0 +1,53 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
+*.egg
+*.egg-info
+dist
+build
+.venv
+venv
+ENV
+env
+
+# Data files (too large for container)
+data/EI_train_data.xlsx
+data/training_dataset/
+
+# Output files
+outputs/
+prediction_files/
+artefacts/
+
+# Logs
+training_logs/run_*/
+*.log
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# Docker
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# Docs
+docs/

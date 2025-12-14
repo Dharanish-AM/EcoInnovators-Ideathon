@@ -4,6 +4,8 @@ Uses a simple U-Net architecture with ResNet18 encoder.
 """
 from __future__ import annotations
 import argparse
+import json
+from datetime import datetime
 from pathlib import Path
 from typing import Tuple
 import torch
@@ -51,10 +53,10 @@ class PVDataset(Dataset):
             image = np.transpose(image, (2, 0, 1))
             image = torch.from_numpy(image)
             mask = torch.from_numpy(mask).unsqueeze(0)
-            
+
         # Ensure mask dim
         if len(mask.shape) == 2:
-           mask = mask.unsqueeze(0)
+            mask = mask.unsqueeze(0)
             
         return image, mask
 
@@ -155,6 +157,7 @@ def train_model(
     epochs: int = 20,
     batch_size: int = 4,
     lr: float = 0.001,
+    log_dir: Path | None = None,
 ):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
@@ -182,6 +185,10 @@ def train_model(
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", patience=3, factor=0.5)
     
     best_val_loss = float("inf")
+    metrics_log_dir = log_dir or Path("training_logs")
+    metrics_log_dir.mkdir(parents=True, exist_ok=True)
+    metrics_path = metrics_log_dir / "metrics.jsonl"
+    summary_path = metrics_log_dir / "training_summary.json"
     
     # Training loop
     for epoch in range(epochs):
@@ -189,8 +196,20 @@ def train_model(
         val_loss = validate(model, val_loader, device)
         
         scheduler.step(val_loss)
-        
-        print(f"Epoch {epoch+1}/{epochs} - Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}")
+        current_lr = optimizer.param_groups[0]["lr"]
+
+        print(f"Epoch {epoch+1}/{epochs} - Train Loss: {train_loss:.4f}, Val Loss: {val_loss:.4f}, LR: {current_lr:.6f}")
+
+        epoch_record = {
+            "epoch": epoch + 1,
+            "train_loss": train_loss,
+            "val_loss": val_loss,
+            "lr": current_lr,
+            "timestamp": datetime.utcnow().isoformat() + "Z",
+        }
+        with metrics_path.open("a", encoding="utf-8") as log_f:
+            json.dump(epoch_record, log_f)
+            log_f.write("\n")
         
         # Save best model
         if val_loss < best_val_loss:
@@ -200,6 +219,19 @@ def train_model(
             print(f"Saved best model to {output_model_path}")
     
     print(f"Training complete. Best val loss: {best_val_loss:.4f}")
+    summary = {
+        "best_val_loss": best_val_loss,
+        "epochs": epochs,
+        "batch_size": batch_size,
+        "lr": lr,
+        "dataset": str(dataset_dir),
+        "model_path": str(output_model_path),
+        "metrics_log": str(metrics_path),
+        "completed_at": datetime.utcnow().isoformat() + "Z",
+    }
+    with summary_path.open("w", encoding="utf-8") as summary_f:
+        json.dump(summary, summary_f, indent=2)
+    print(f"Wrote metrics to {metrics_path} and summary to {summary_path}")
 
 
 def main():
@@ -209,6 +241,7 @@ def main():
     parser.add_argument("--epochs", type=int, default=20, help="Number of epochs")
     parser.add_argument("--batch_size", type=int, default=4, help="Batch size")
     parser.add_argument("--lr", type=float, default=0.001, help="Learning rate")
+    parser.add_argument("--log_dir", default="training_logs", help="Directory to write metrics and logs")
     
     args = parser.parse_args()
     
@@ -218,6 +251,7 @@ def main():
         epochs=args.epochs,
         batch_size=args.batch_size,
         lr=args.lr,
+        log_dir=Path(args.log_dir),
     )
 
 
