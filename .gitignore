@@ -16,21 +16,6 @@ env/
 data/EI_train_data.xlsx
 data/training_dataset/
 
-# Outputs
-outputs/
-prediction_files/predictions.jsonl
-artefacts/overlays/*.png
-artefacts/sample_tiles/*.png
-
-# Models
-trained_model/*.pt
-trained_model/*.pth
-
-# Logs
-training_logs/*.csv
-training_logs/*.txt
-*.log
-
 # IDE
 .vscode/
 .idea/
